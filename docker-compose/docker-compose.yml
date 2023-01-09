@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  dorm:
+    image: registry.cn-hangzhou.aliyuncs.com/hlwkf_test/test:1.5
+    ports:
+      - "8083:8083"
+    links:
+      - mysql:mysql
+      - redis:redis 
+      - rabbit:rabbit
+    depends_on: 
+      - redis
+      - mysql
+      - rabbit
+
+  order:
+    image: registry.cn-hangzhou.aliyuncs.com/hlwkf_test/t2:1.1
+    links:
+      - mysql:mysql
+      - rabbit:rabbit
+
+  redis:
+    image: redis:latest
+    volumes:
+      - ../redis/redis.conf:/etc/redis/redis.conf:ro
+      - ../redis/data:/data
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    ports:
+      - "6379:6379"
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - ../mysql/my.cnf:/etc/mysql/my.cnf:ro
+      - ../mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: abc123321A
+    ports:
+      - "3306:3306"
+
+  rabbit:
+    image: rabbitmq:3.9-management
+    volumes:
+      - ../rabbitmq/data:/home/rabbitmq/data
+    enviroment:
+      RABBITMQ_DEFAULT_USER: user01
+      RABBITMQ_DEFAULT_PASS: 123456
